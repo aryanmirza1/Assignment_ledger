@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Project Tracker",
-    "slug": "project-tracker",
+    "name": "Assignment Ledger",
+    "slug": "assignment-ledger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.aryan.projecttracker",
+      "package": "com.aryan.assignmentledger",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
