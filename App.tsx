@@ -1,20 +1,64 @@
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { AppNavigator } from './src/navigation/AppNavigator';
+import { initDatabase } from './src/data/database';
+import { ensureStorage } from './src/services/fileService';
+import { colors } from './src/theme/theme';
 
 export default function App() {
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const boot = async () => {
+      try {
+        await initDatabase();
+        await ensureStorage();
+        setReady(true);
+      } catch (bootError) {
+        setError(bootError instanceof Error ? bootError.message : 'Unable to start the app.');
+      }
+    };
+    void boot();
+  }, []);
+
+  if (!ready) {
+    return (
+      <SafeAreaProvider>
+        <View style={styles.loading}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <Text style={styles.loadingText}>{error || 'Opening Assignment Ledger...'}</Text>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <StatusBar style="dark" />
+        <AppNavigator />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  loading: {
     alignItems: 'center',
+    backgroundColor: colors.background,
+    flex: 1,
     justifyContent: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    color: colors.muted,
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 16,
+    textAlign: 'center',
   },
 });
