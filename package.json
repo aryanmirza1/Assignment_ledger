@@ -1,5 +1,5 @@
 {
-  "name": "assignment-ledger",
+  "name": "project-tracker",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {

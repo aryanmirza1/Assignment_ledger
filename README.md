@@ -1,6 +1,6 @@
 # Project Tracker
 
-A personal, offline-first React Native app for tracking projects, assignments, clients, payments, files, and PDF reports.
+A personal, offline-first React Native app for tracking projects, clients, payments, files, and PDF reports.
 
 ## Tech Stack
 
@@ -47,6 +47,6 @@ If EAS asks for Android credentials, let it generate them. The app stores data l
 
 ## Notes
 
-- The app seeds three sample assignments on first launch.
+- The app seeds three sample projects on first launch.
 - Settings includes PDF export, JSON backup export/import, clear all data, and seed-data restore.
 - Picked reference files are copied into the app document directory and linked from SQLite.
