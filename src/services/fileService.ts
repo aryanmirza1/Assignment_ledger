@@ -1,5 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as IntentLauncher from 'expo-intent-launcher';
 import * as Sharing from 'expo-sharing';
 import { Alert, Platform } from 'react-native';
 import { addFileRecord, importSnapshot } from '../data/database';
@@ -43,6 +44,46 @@ export const pickAndAttachFiles = async (assignmentId: number) => {
   return saved;
 };
 
+const getUTIFromMime = (mimeType: string) => {
+  if (mimeType.includes('pdf')) return 'com.adobe.pdf';
+  if (mimeType.includes('json')) return 'public.json';
+  if (mimeType.includes('image')) return 'public.image';
+  if (mimeType.includes('document') || mimeType.includes('msword')) return 'com.microsoft.word.doc';
+  return undefined;
+};
+
+export const openFileLocally = async (localUri: string, mimeType: string) => {
+  try {
+    if (Platform.OS === 'android') {
+      const contentUri = await FileSystem.getContentUriAsync(localUri);
+      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+        data: contentUri,
+        flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+        type: mimeType,
+      });
+    } else {
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(localUri, {
+          mimeType,
+          UTI: getUTIFromMime(mimeType),
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error opening file:', error);
+    // Fallback to regular share sheet if launcher fails or app is missing
+    try {
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(localUri);
+      }
+    } catch (shareError) {
+      console.error('Sharing fallback failed:', shareError);
+    }
+  }
+};
+
 export const shareFile = async (uri: string) => {
   const canShare = await Sharing.isAvailableAsync();
   if (!canShare) {
@@ -75,6 +116,10 @@ export const saveFileToDevice = async (localUri: string, fileName: string, mimeT
         });
         
         Alert.alert('Download Successful', `Saved "${fileName}" to your selected folder.`);
+        
+        // Open file immediately
+        void openFileLocally(localUri, mimeType);
+        
         return safUri;
       }
     }

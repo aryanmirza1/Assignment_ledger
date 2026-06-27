@@ -24,7 +24,7 @@ import { exportFullRecordsPdf } from '../services/pdfService';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 import { currency, displayDate, isDueSoon, isOverdue } from '../utils/format';
 
-type Navigation = NativeStackNavigationProp<RootStackParamList>;
+type Navigation = any;
 
 export function DashboardScreen() {
   const navigation = useNavigation<Navigation>();

@@ -19,7 +19,7 @@ import { importBackupFile, writeBackupFile } from '../services/fileService';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 
 export function SettingsScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [clearOpen, setClearOpen] = useState(false);
 
   const exportPdf = async () => {
@@ -48,7 +48,7 @@ export function SettingsScreen() {
     await clearAllData();
     setClearOpen(false);
     Alert.alert('Data cleared', 'All local records were removed.');
-    navigation.navigate('Dashboard' as never);
+    navigation.navigate('MainTabs', { screen: 'Dashboard' });
   };
 
 
