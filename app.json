@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Project Tracker",
-    "slug": "project-tracker",
+    "slug": "assignment-ledger",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
