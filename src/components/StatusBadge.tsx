@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { AssignmentStatus, PaymentStatus, Priority } from '../data/types';
+import { ProjectStatus, PaymentStatus, Priority } from '../data/types';
 import { colors, radii } from '../theme/theme';
 
 type Props = {
-  label: AssignmentStatus | PaymentStatus | Priority | string;
+  label: ProjectStatus | PaymentStatus | Priority | string;
   type?: 'status' | 'payment' | 'priority';
 };
 

@@ -5,11 +5,11 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { Plus, Search, SlidersHorizontal } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '../components/AppHeader';
-import { AssignmentCard } from '../components/AssignmentCard';
+import { ProjectCard } from '../components/ProjectCard';
 import { EmptyState } from '../components/EmptyState';
 import { FilterChip } from '../components/FilterChip';
-import { Assignment } from '../data/types';
-import { listAssignments } from '../data/database';
+import { Project } from '../data/types';
+import { listProjects } from '../data/database';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 import { isOverdue } from '../utils/format';
@@ -19,10 +19,10 @@ type Navigation = NativeStackNavigationProp<RootStackParamList>;
 
 const filters: Filter[] = ['All', 'Active', 'Completed', 'Pending Payment', 'Overdue'];
 
-export function AssignmentsScreen() {
+export function ProjectsScreen() {
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('All');
 
@@ -35,7 +35,7 @@ export function AssignmentsScreen() {
   }, [route.params, navigation]);
 
   const load = useCallback(async () => {
-    setAssignments(await listAssignments());
+    setProjects(await listProjects());
   }, []);
 
   useFocusEffect(
@@ -46,26 +46,26 @@ export function AssignmentsScreen() {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return assignments.filter((assignment) => {
+    return projects.filter((project) => {
       const matchesSearch =
         !needle ||
-        [assignment.studentName, assignment.subject, assignment.title]
+        [project.studentName, project.subject, project.title]
           .join(' ')
           .toLowerCase()
           .includes(needle);
       const matchesFilter =
         filter === 'All' ||
-        (filter === 'Active' && assignment.status !== 'Completed' && assignment.status !== 'Cancelled') ||
-        (filter === 'Completed' && assignment.status === 'Completed') ||
-        (filter === 'Pending Payment' && assignment.remainingAmount > 0) ||
-        (filter === 'Overdue' && isOverdue(assignment));
+        (filter === 'Active' && project.status !== 'Completed' && project.status !== 'Cancelled') ||
+        (filter === 'Completed' && project.status === 'Completed') ||
+        (filter === 'Pending Payment' && project.remainingAmount > 0) ||
+        (filter === 'Overdue' && isOverdue(project));
       return matchesSearch && matchesFilter;
     });
-  }, [assignments, filter, query]);
+  }, [projects, filter, query]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
-      <AppHeader title="Assignments" subtitle={`${assignments.length} records`} rightIcon={SlidersHorizontal} />
+      <AppHeader title="Projects" subtitle={`${projects.length} records`} rightIcon={SlidersHorizontal} />
       <View style={styles.mainContainer}>
         <View style={styles.searchWrap}>
           <Search color={colors.muted} size={20} />
@@ -91,25 +91,25 @@ export function AssignmentsScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {filtered.length ? (
             <View style={styles.list}>
-              {filtered.map((assignment) => (
-                <AssignmentCard
-                  assignment={assignment}
-                  key={assignment.id}
-                  onPress={() => navigation.navigate('AssignmentDetail', { assignmentId: assignment.id })}
+              {filtered.map((project) => (
+                <ProjectCard
+                  project={project}
+                  key={project.id}
+                  onPress={() => navigation.navigate('ProjectDetail', { projectId: project.id })}
                 />
               ))}
             </View>
           ) : (
             <EmptyState
               icon={Search}
-              title="No assignments found"
-              description="Try another filter or create a new assignment record."
-              actionLabel="Add Assignment"
-              onAction={() => navigation.navigate('AssignmentForm')}
+              title="No projects found"
+              description="Try another filter or create a new project record."
+              actionLabel="Add Project"
+              onAction={() => navigation.navigate('ProjectForm')}
             />
           )}
         </ScrollView>
-        <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('AssignmentForm')}>
+        <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('ProjectForm')}>
           <Plus color={colors.white} size={30} />
         </TouchableOpacity>
       </View>

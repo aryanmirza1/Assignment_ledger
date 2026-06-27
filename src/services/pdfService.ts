@@ -1,11 +1,10 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
-import { Alert } from 'react-native';
-import { Assignment, LedgerFile, Payment, Analytics } from '../data/types';
+import { Project, LedgerFile, Payment, Analytics } from '../data/types';
 import { currency, displayDate, nowISO } from '../utils/format';
 import { saveFileToDevice } from './fileService';
 
-const pdfDirectory = `${FileSystem.documentDirectory}assignment-ledger-pdfs/`;
+const pdfDirectory = `${FileSystem.documentDirectory}project-tracker-pdfs/`;
 
 const ensurePdfDir = async () => {
   await FileSystem.makeDirectoryAsync(pdfDirectory, { intermediates: true }).catch(() => {});
@@ -35,34 +34,34 @@ const savePdfLocally = async (tempUri: string, fileName: string): Promise<string
   return destination;
 };
 
-export const exportAssignmentPdf = async (
-  assignment: Assignment,
+export const exportProjectPdf = async (
+  project: Project,
   payments: Payment[],
   files: LedgerFile[],
 ) => {
   const html = `
     <html><head>${styles}</head><body>
-      <h1>${escapeHtml(assignment.title)}</h1>
-      <div class="muted">Assignment Ledger report generated ${displayDate(nowISO())}</div>
+      <h1>${escapeHtml(project.title)}</h1>
+      <div class="muted">Project Tracker report generated ${displayDate(nowISO())}</div>
       <div class="grid">
-        ${metric('Student', assignment.studentName)}
-        ${metric('Subject', assignment.subject)}
-        ${metric('Deadline', displayDate(assignment.deadline))}
-        ${metric('Status', assignment.status)}
-        ${metric('Priority', assignment.priority)}
-        ${metric('Payment', assignment.paymentStatus)}
-        ${metric('Total', currency(assignment.totalAmount))}
-        ${metric('Paid', currency(assignment.paidAmount))}
-        ${metric('Remaining', currency(assignment.remainingAmount))}
+        ${metric('Client/Student', project.studentName)}
+        ${metric('Subject', project.subject)}
+        ${metric('Deadline', displayDate(project.deadline))}
+        ${metric('Status', project.status)}
+        ${metric('Priority', project.priority)}
+        ${metric('Payment', project.paymentStatus)}
+        ${metric('Total', currency(project.totalAmount))}
+        ${metric('Paid', currency(project.paidAmount))}
+        ${metric('Remaining', currency(project.remainingAmount))}
       </div>
 
       <h2>Client Details</h2>
-      <p><strong>Phone:</strong> ${escapeHtml(assignment.studentPhone || '-')}</p>
-      <p><strong>Email:</strong> ${escapeHtml(assignment.studentEmail || '-')}</p>
-      <p><strong>Institution:</strong> ${escapeHtml(assignment.institution || '-')}</p>
+      <p><strong>Phone:</strong> ${escapeHtml(project.studentPhone || '-')}</p>
+      <p><strong>Email:</strong> ${escapeHtml(project.studentEmail || '-')}</p>
+      <p><strong>Institution:</strong> ${escapeHtml(project.institution || '-')}</p>
 
       <h2>Notes</h2>
-      <p>${escapeHtml(assignment.notes || 'No notes added.')}</p>
+      <p>${escapeHtml(project.notes || 'No notes added.')}</p>
 
       <h2>Payment History</h2>
       ${paymentsTable(payments)}
@@ -75,11 +74,11 @@ export const exportAssignmentPdf = async (
       }
 
       <h2>Record Dates</h2>
-      <p><strong>Created:</strong> ${displayDate(assignment.createdAt)} &nbsp; <strong>Updated:</strong> ${displayDate(assignment.updatedAt)}</p>
+      <p><strong>Created:</strong> ${displayDate(project.createdAt)} &nbsp; <strong>Updated:</strong> ${displayDate(project.updatedAt)}</p>
     </body></html>
   `;
   const file = await Print.printToFileAsync({ html });
-  const safeName = assignment.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+  const safeName = project.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
   const name = `${safeName}-${Date.now()}.pdf`;
   const localUri = await savePdfLocally(file.uri, name);
   await saveFileToDevice(localUri, name, 'application/pdf');
@@ -88,27 +87,27 @@ export const exportAssignmentPdf = async (
 
 export const exportFullRecordsPdf = async (
   analytics: Analytics,
-  assignments: Assignment[],
+  projects: Project[],
   payments: Payment[],
 ) => {
   const html = `
     <html><head>${styles}</head><body>
-      <h1>Assignment Ledger</h1>
+      <h1>Project Tracker</h1>
       <div class="muted">Full records report generated ${displayDate(nowISO())}</div>
       <div class="grid">
-        ${metric('Total Assignments', analytics.totalAssignments)}
-        ${metric('Active', analytics.activeAssignments)}
-        ${metric('Completed', analytics.completedAssignments)}
-        ${metric('Overdue', analytics.overdueAssignments)}
+        ${metric('Total Projects', analytics.totalProjects)}
+        ${metric('Active', analytics.activeProjects)}
+        ${metric('Completed', analytics.completedProjects)}
+        ${metric('Overdue', analytics.overdueProjects)}
         ${metric('Total Received', currency(analytics.totalReceived))}
         ${metric('Total Remaining', currency(analytics.totalRemaining))}
       </div>
 
-      <h2>Assignments</h2>
+      <h2>Projects</h2>
       <table>
         <thead><tr><th>Title</th><th>Student</th><th>Subject</th><th>Deadline</th><th>Status</th><th>Total</th><th>Paid</th><th>Remaining</th></tr></thead>
         <tbody>
-          ${assignments
+          ${projects
             .map(
               (item) => `
                 <tr>
@@ -151,14 +150,14 @@ const paymentsTable = (payments: Payment[]) => {
   }
   return `
     <table>
-      <thead><tr><th>Date</th><th>Assignment</th><th>Student</th><th>Amount</th><th>Method</th><th>Note</th></tr></thead>
+      <thead><tr><th>Date</th><th>Project</th><th>Student</th><th>Amount</th><th>Method</th><th>Note</th></tr></thead>
       <tbody>
         ${payments
           .map(
             (payment) => `
               <tr>
                 <td>${displayDate(payment.paymentDate)}</td>
-                <td>${escapeHtml(payment.assignmentTitle ?? '')}</td>
+                <td>${escapeHtml(payment.projectTitle ?? '')}</td>
                 <td>${escapeHtml(payment.studentName ?? '')}</td>
                 <td>${currency(payment.amount)}</td>
                 <td>${payment.paymentMethod}</td>

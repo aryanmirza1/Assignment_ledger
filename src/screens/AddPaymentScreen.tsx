@@ -7,8 +7,8 @@ import { AppHeader } from '../components/AppHeader';
 import { PrimaryButton } from '../components/Buttons';
 import { FilterChip } from '../components/FilterChip';
 import { TextInputField } from '../components/TextInputField';
-import { addPayment, listAssignments } from '../data/database';
-import { Assignment, paymentMethods, PaymentMethod } from '../data/types';
+import { addPayment, listProjects } from '../data/database';
+import { Project, paymentMethods, PaymentMethod } from '../data/types';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 import { currency, safeNumber, todayISO } from '../utils/format';
@@ -16,8 +16,8 @@ import { currency, safeNumber, todayISO } from '../utils/format';
 type Props = NativeStackScreenProps<RootStackParamList, 'AddPayment'>;
 
 export function AddPaymentScreen({ navigation, route }: Props) {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [assignmentId, setAssignmentId] = useState<number | undefined>(route.params?.assignmentId);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectId, setProjectId] = useState<number | undefined>(route.params?.projectId);
   const [amount, setAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState(todayISO());
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
@@ -26,22 +26,22 @@ export function AddPaymentScreen({ navigation, route }: Props) {
 
   React.useEffect(() => {
     const load = async () => {
-      const result = await listAssignments();
-      setAssignments(result);
-      if (!assignmentId && result[0]) setAssignmentId(result[0].id);
+      const result = await listProjects();
+      setProjects(result);
+      if (!projectId && result[0]) setProjectId(result[0].id);
     };
     void load();
-  }, [assignmentId]);
+  }, [projectId]);
 
   const selected = useMemo(
-    () => assignments.find((assignment) => assignment.id === assignmentId),
-    [assignmentId, assignments],
+    () => projects.find((project) => project.id === projectId),
+    [projectId, projects],
   );
 
   const save = useCallback(async () => {
     const paidAmount = safeNumber(amount);
-    if (!assignmentId || !selected) {
-      setError('Select an assignment first.');
+    if (!projectId || !selected) {
+      setError('Select a project first.');
       return;
     }
     if (paidAmount <= 0) {
@@ -50,7 +50,7 @@ export function AddPaymentScreen({ navigation, route }: Props) {
     }
 
     const commit = async () => {
-      await addPayment(assignmentId, paidAmount, paymentMethod, paymentDate, note);
+      await addPayment(projectId, paidAmount, paymentMethod, paymentDate, note);
       navigation.goBack();
     };
 
@@ -67,28 +67,28 @@ export function AddPaymentScreen({ navigation, route }: Props) {
     }
 
     await commit();
-  }, [amount, assignmentId, navigation, note, paymentDate, paymentMethod, selected]);
+  }, [amount, projectId, navigation, note, paymentDate, paymentMethod, selected]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
-      <AppHeader title="Add Payment" subtitle="Update assignment balance" onBack={() => navigation.goBack()} rightIcon={WalletCards} />
+      <AppHeader title="Add Payment" subtitle="Update project balance" onBack={() => navigation.goBack()} rightIcon={WalletCards} />
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={styles.section}>Select Assignment</Text>
-          <View style={styles.assignmentList}>
-            {assignments.map((assignment) => (
+          <Text style={styles.section}>Select Project</Text>
+          <View style={styles.projectList}>
+            {projects.map((project) => (
               <TouchableOpacity
-                key={assignment.id}
-                onPress={() => setAssignmentId(assignment.id)}
-                style={[styles.assignmentCard, assignmentId === assignment.id && styles.assignmentActive]}
+                key={project.id}
+                onPress={() => setProjectId(project.id)}
+                style={[styles.projectCard, projectId === project.id && styles.projectActive]}
               >
                 <View style={styles.flex}>
-                  <Text style={styles.assignmentTitle}>{assignment.title}</Text>
-                  <Text style={styles.assignmentMeta}>
-                    {assignment.studentName} · Remaining {currency(assignment.remainingAmount)}
+                  <Text style={styles.projectTitle}>{project.title}</Text>
+                  <Text style={styles.projectMeta}>
+                    {project.studentName} · Remaining {currency(project.remainingAmount)}
                   </Text>
                 </View>
-                {assignmentId === assignment.id ? <Check color={colors.accent} size={22} /> : null}
+                {projectId === project.id ? <Check color={colors.accent} size={22} /> : null}
               </TouchableOpacity>
             ))}
           </View>
@@ -156,10 +156,10 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     marginTop: spacing.sm,
   },
-  assignmentList: {
+  projectList: {
     gap: spacing.sm,
   },
-  assignmentCard: {
+  projectCard: {
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -170,18 +170,18 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     ...shadows.soft,
   },
-  assignmentActive: {
+  projectActive: {
     borderColor: colors.accent,
   },
   flex: {
     flex: 1,
   },
-  assignmentTitle: {
+  projectTitle: {
     color: colors.text,
     fontSize: 16,
     fontWeight: '900',
   },
-  assignmentMeta: {
+  projectMeta: {
     color: colors.muted,
     fontSize: 13,
     marginTop: 4,

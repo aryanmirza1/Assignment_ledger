@@ -1,4 +1,4 @@
-import { Assignment } from '../data/types';
+import { Project } from '../data/types';
 
 export const currency = (value: number) =>
   `Rs ${Number(value || 0).toLocaleString('en-PK', { maximumFractionDigits: 0 })}`;
@@ -22,17 +22,17 @@ export const displayDate = (value?: string) => {
   });
 };
 
-export const isOverdue = (assignment: Assignment) => {
-  const due = new Date(`${assignment.deadline}T23:59:59`);
-  const isClosed = assignment.status === 'Completed' || assignment.status === 'Cancelled';
+export const isOverdue = (project: Project) => {
+  const due = new Date(`${project.deadline}T23:59:59`);
+  const isClosed = project.status === 'Completed' || project.status === 'Cancelled';
   return !isClosed && due.getTime() < Date.now();
 };
 
-export const isDueSoon = (assignment: Assignment) => {
-  const due = new Date(`${assignment.deadline}T23:59:59`);
+export const isDueSoon = (project: Project) => {
+  const due = new Date(`${project.deadline}T23:59:59`);
   const now = Date.now();
   const sevenDays = 7 * 24 * 60 * 60 * 1000;
-  const isClosed = assignment.status === 'Completed' || assignment.status === 'Cancelled';
+  const isClosed = project.status === 'Completed' || project.status === 'Cancelled';
   return !isClosed && due.getTime() >= now && due.getTime() <= now + sevenDays;
 };
 

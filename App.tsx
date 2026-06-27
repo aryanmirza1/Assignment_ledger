@@ -30,7 +30,7 @@ export default function App() {
       <SafeAreaProvider>
         <View style={styles.loading}>
           <ActivityIndicator color={colors.primary} size="large" />
-          <Text style={styles.loadingText}>{error || 'Opening Assignment Ledger...'}</Text>
+          <Text style={styles.loadingText}>{error || 'Opening Project Tracker...'}</Text>
         </View>
       </SafeAreaProvider>
     );

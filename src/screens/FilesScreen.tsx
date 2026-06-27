@@ -38,7 +38,7 @@ export function FilesScreen() {
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return files.filter((file) => {
-      const search = [file.fileName, file.assignmentTitle, file.studentName]
+      const search = [file.fileName, file.projectTitle, file.studentName]
         .join(' ')
         .toLowerCase()
         .includes(needle);
@@ -60,7 +60,7 @@ export function FilesScreen() {
         <View style={styles.searchWrap}>
           <Search color={colors.muted} size={20} />
           <TextInput
-            placeholder="Search files, assignments, students..."
+            placeholder="Search files, projects, clients..."
             placeholderTextColor={colors.muted}
             value={query}
             onChangeText={setQuery}
@@ -88,7 +88,7 @@ export function FilesScreen() {
             <EmptyState
               icon={FileSearch}
               title="No files uploaded yet"
-              description="Attach PDFs, DOCX, images, or documents from an assignment detail screen."
+              description="Attach PDFs, DOCX, images, or documents from a project detail screen."
             />
           )}
         </ScrollView>

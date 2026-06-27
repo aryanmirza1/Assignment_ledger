@@ -22,7 +22,7 @@ export function FileCard({ file, onShare, onDelete }: Props) {
         <Text numberOfLines={1} style={styles.name}>
           {file.fileName}
         </Text>
-        <Text style={styles.subtitle}>{file.assignmentTitle}</Text>
+        <Text style={styles.subtitle}>{file.projectTitle}</Text>
         <Text style={styles.meta}>
           {file.studentName} · {displayDate(file.uploadedAt)}
         </Text>

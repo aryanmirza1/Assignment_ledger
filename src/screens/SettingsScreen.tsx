@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '../components/AppHeader';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { clearAllData, exportSnapshot, getAnalytics, listAssignments, listPayments } from '../data/database';
+import { clearAllData, exportSnapshot, getAnalytics, listProjects, listPayments } from '../data/database';
 import { exportFullRecordsPdf } from '../services/pdfService';
 import { importBackupFile, writeBackupFile } from '../services/fileService';
 import { colors, radii, shadows, spacing } from '../theme/theme';
@@ -23,12 +23,12 @@ export function SettingsScreen() {
   const [clearOpen, setClearOpen] = useState(false);
 
   const exportPdf = async () => {
-    const [analytics, assignments, payments] = await Promise.all([
+    const [analytics, projects, payments] = await Promise.all([
       getAnalytics(),
-      listAssignments(),
+      listProjects(),
       listPayments(),
     ]);
-    await exportFullRecordsPdf(analytics, assignments, payments);
+    await exportFullRecordsPdf(analytics, projects, payments);
   };
 
   const exportBackup = async () => {
@@ -40,7 +40,7 @@ export function SettingsScreen() {
       const ok = await importBackupFile();
       if (ok) Alert.alert('Backup imported', 'Your local records were restored.');
     } catch {
-      Alert.alert('Import failed', 'Please choose a valid Assignment Ledger JSON backup.');
+      Alert.alert('Import failed', 'Please choose a valid Project Tracker JSON backup.');
     }
   };
 
@@ -50,8 +50,6 @@ export function SettingsScreen() {
     Alert.alert('Data cleared', 'All local records were removed.');
     navigation.navigate('MainTabs', { screen: 'Dashboard' });
   };
-
-
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
@@ -64,7 +62,7 @@ export function SettingsScreen() {
             </View>
             <View style={styles.flex}>
               <Text style={styles.name}>Aryan</Text>
-              <Text style={styles.meta}>Assignment Ledger</Text>
+              <Text style={styles.meta}>Project Tracker</Text>
             </View>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>Local only</Text>
@@ -81,8 +79,8 @@ export function SettingsScreen() {
               title="About App"
               onPress={() =>
                 Alert.alert(
-                  'Assignment Ledger',
-                  'A personal offline app for tracking assignments, clients, payments, files, and PDF reports.',
+                  'Project Tracker',
+                  'A personal offline app for tracking projects, clients, payments, files, and PDF reports.',
                 )
               }
             />
@@ -97,7 +95,7 @@ export function SettingsScreen() {
       <ConfirmModal
         visible={clearOpen}
         title="Clear all data?"
-        message="This permanently removes assignments, payments, and file records from this device."
+        message="This permanently removes projects, payments, and file records from this device."
         confirmLabel="Clear Data"
         destructive
         onCancel={() => setClearOpen(false)}

@@ -61,7 +61,7 @@ export function PaymentsScreen() {
             <EmptyState
               icon={WalletCards}
               title="No payments recorded yet"
-              description="Add a payment to update assignment balances automatically."
+              description="Add a payment to update project balances automatically."
               actionLabel="Add Payment"
               onAction={() => navigation.navigate('AddPayment')}
             />

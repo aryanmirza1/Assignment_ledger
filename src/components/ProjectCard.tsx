@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CalendarDays, UserRound } from 'lucide-react-native';
-import { Assignment } from '../data/types';
+import { Project } from '../data/types';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 import { currency, displayDate, isOverdue } from '../utils/format';
 import { PaymentProgressBar } from './PaymentProgressBar';
@@ -9,43 +9,43 @@ import { StatusBadge } from './StatusBadge';
 import { PrimaryButton } from './Buttons';
 
 type Props = {
-  assignment: Assignment;
+  project: Project;
   onPress: () => void;
 };
 
-export function AssignmentCard({ assignment, onPress }: Props) {
+export function ProjectCard({ project, onPress }: Props) {
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.card}>
       <View style={styles.top}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{assignment.studentName.slice(0, 1).toUpperCase()}</Text>
+          <Text style={styles.avatarText}>{project.studentName.slice(0, 1).toUpperCase()}</Text>
         </View>
         <View style={styles.flex}>
-          <Text style={styles.title}>{assignment.title}</Text>
-          <Text style={styles.subject}>{assignment.subject}</Text>
+          <Text style={styles.title}>{project.title}</Text>
+          <Text style={styles.subject}>{project.subject}</Text>
         </View>
-        <StatusBadge label={isOverdue(assignment) ? 'Overdue' : assignment.status} />
+        <StatusBadge label={isOverdue(project) ? 'Overdue' : project.status} />
       </View>
 
       <View style={styles.metaRow}>
         <View style={styles.meta}>
           <UserRound size={15} color={colors.muted} />
-          <Text style={styles.metaText}>{assignment.studentName}</Text>
+          <Text style={styles.metaText}>{project.studentName}</Text>
         </View>
         <View style={styles.meta}>
           <CalendarDays size={15} color={colors.muted} />
-          <Text style={styles.metaText}>{displayDate(assignment.deadline)}</Text>
+          <Text style={styles.metaText}>{displayDate(project.deadline)}</Text>
         </View>
       </View>
 
       <View style={styles.amounts}>
-        <Text style={styles.amountText}>Total {currency(assignment.totalAmount)}</Text>
-        <Text style={styles.amountText}>Paid {currency(assignment.paidAmount)}</Text>
-        <Text style={[styles.amountText, assignment.remainingAmount > 0 && styles.warning]}>
-          Due {currency(assignment.remainingAmount)}
+        <Text style={styles.amountText}>Total {currency(project.totalAmount)}</Text>
+        <Text style={styles.amountText}>Paid {currency(project.paidAmount)}</Text>
+        <Text style={[styles.amountText, project.remainingAmount > 0 && styles.warning]}>
+          Due {currency(project.remainingAmount)}
         </Text>
       </View>
-      <PaymentProgressBar paid={assignment.paidAmount} total={assignment.totalAmount} />
+      <PaymentProgressBar paid={project.paidAmount} total={project.totalAmount} />
       <PrimaryButton title="View Details" onPress={onPress} style={styles.button} />
     </TouchableOpacity>
   );

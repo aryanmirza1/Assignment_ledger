@@ -11,62 +11,62 @@ import { PaymentCard } from '../components/PaymentCard';
 import { PaymentProgressBar } from '../components/PaymentProgressBar';
 import { StatusBadge } from '../components/StatusBadge';
 import {
-  deleteAssignment,
+  deleteProject,
   deleteFileRecord,
   deletePayment,
-  getAssignment,
+  getProject,
   listFiles,
   listPayments,
-  markAssignmentCompleted,
+  markProjectCompleted,
 } from '../data/database';
-import { Assignment, LedgerFile, Payment } from '../data/types';
+import { Project, LedgerFile, Payment } from '../data/types';
 import { RootStackParamList } from '../navigation/types';
 import { pickAndAttachFiles, shareFile } from '../services/fileService';
-import { exportAssignmentPdf } from '../services/pdfService';
+import { exportProjectPdf } from '../services/pdfService';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 import { currency, displayDate } from '../utils/format';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'AssignmentDetail'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'ProjectDetail'>;
 
-export function AssignmentDetailScreen({ navigation, route }: Props) {
-  const { assignmentId } = route.params;
-  const [assignment, setAssignment] = useState<Assignment | null>(null);
+export function ProjectDetailScreen({ navigation, route }: Props) {
+  const { projectId } = route.params;
+  const [project, setProject] = useState<Project | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [files, setFiles] = useState<LedgerFile[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const load = useCallback(async () => {
-    const [assignmentResult, paymentResult, fileResult] = await Promise.all([
-      getAssignment(assignmentId),
-      listPayments(assignmentId),
-      listFiles(assignmentId),
+    const [projectResult, paymentResult, fileResult] = await Promise.all([
+      getProject(projectId),
+      listPayments(projectId),
+      listFiles(projectId),
     ]);
-    setAssignment(assignmentResult);
+    setProject(projectResult);
     setPayments(paymentResult);
     setFiles(fileResult);
-  }, [assignmentId]);
+  }, [projectId]);
 
   React.useEffect(() => {
     void load();
   }, [load]);
 
   const attachFiles = async () => {
-    await pickAndAttachFiles(assignmentId);
+    await pickAndAttachFiles(projectId);
     await load();
   };
 
   const complete = async () => {
-    await markAssignmentCompleted(assignmentId);
+    await markProjectCompleted(projectId);
     await load();
   };
 
   const exportPdf = async () => {
-    if (!assignment) return;
-    await exportAssignmentPdf(assignment, payments, files);
+    if (!project) return;
+    await exportProjectPdf(project, payments, files);
   };
 
   const remove = async () => {
-    await deleteAssignment(assignmentId);
+    await deleteProject(projectId);
     setDeleteOpen(false);
     navigation.goBack();
   };
@@ -81,62 +81,62 @@ export function AssignmentDetailScreen({ navigation, route }: Props) {
     await load();
   };
 
-  if (!assignment) {
+  if (!project) {
     return (
       <SafeAreaView edges={['top']} style={styles.safe}>
-        <AppHeader title="Assignment" subtitle="Loading..." onBack={() => navigation.goBack()} />
+        <AppHeader title="Project Details" subtitle="Loading..." onBack={() => navigation.goBack()} />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
-      <AppHeader title="Assignment" subtitle={assignment.studentName} onBack={() => navigation.goBack()} rightIcon={Edit3} onRightPress={() => navigation.navigate('AssignmentForm', { assignmentId })} />
+      <AppHeader title="Project Details" subtitle={project.studentName} onBack={() => navigation.goBack()} rightIcon={Edit3} onRightPress={() => navigation.navigate('ProjectForm', { projectId })} />
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
-            <Text style={styles.title}>{assignment.title}</Text>
-            <Text style={styles.subtitle}>{assignment.subject}</Text>
+            <Text style={styles.title}>{project.title}</Text>
+            <Text style={styles.subtitle}>{project.subject}</Text>
             <View style={styles.badges}>
-              <StatusBadge label={assignment.status} />
-              <StatusBadge label={assignment.paymentStatus} type="payment" />
+              <StatusBadge label={project.status} />
+              <StatusBadge label={project.paymentStatus} type="payment" />
             </View>
           </View>
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Payment Summary</Text>
             <View style={styles.amountRow}>
-              <Metric label="Total" value={currency(assignment.totalAmount)} />
-              <Metric label="Paid" value={currency(assignment.paidAmount)} />
-              <Metric label="Remaining" value={currency(assignment.remainingAmount)} warning />
+              <Metric label="Total" value={currency(project.totalAmount)} />
+              <Metric label="Paid" value={currency(project.paidAmount)} />
+              <Metric label="Remaining" value={currency(project.remainingAmount)} warning />
             </View>
-            <PaymentProgressBar paid={assignment.paidAmount} total={assignment.totalAmount} />
+            <PaymentProgressBar paid={project.paidAmount} total={project.totalAmount} />
           </View>
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Client Details</Text>
-            <InfoRow label="Student/client" value={assignment.studentName} />
-            <InfoRow label="Phone" value={assignment.studentPhone || '-'} />
-            <InfoRow label="Email" value={assignment.studentEmail || '-'} />
-            <InfoRow label="Institution" value={assignment.institution || '-'} />
-            <InfoRow label="Deadline" value={displayDate(assignment.deadline)} />
-            <InfoRow label="Start date" value={displayDate(assignment.startDate)} />
-            <InfoRow label="Created" value={displayDate(assignment.createdAt)} />
-            <InfoRow label="Updated" value={displayDate(assignment.updatedAt)} />
+            <InfoRow label="Student/client" value={project.studentName} />
+            <InfoRow label="Phone" value={project.studentPhone || '-'} />
+            <InfoRow label="Email" value={project.studentEmail || '-'} />
+            <InfoRow label="Institution" value={project.institution || '-'} />
+            <InfoRow label="Deadline" value={displayDate(project.deadline)} />
+            <InfoRow label="Start date" value={displayDate(project.startDate)} />
+            <InfoRow label="Created" value={displayDate(project.createdAt)} />
+            <InfoRow label="Updated" value={displayDate(project.updatedAt)} />
           </View>
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Notes</Text>
-            <Text style={styles.notes}>{assignment.notes || 'No notes added.'}</Text>
+            <Text style={styles.notes}>{project.notes || 'No notes added.'}</Text>
           </View>
 
           <View style={styles.actions}>
-            <PrimaryButton title="Add Payment" icon={WalletCards} onPress={() => navigation.navigate('AddPayment', { assignmentId })} />
-            <SecondaryButton title="Edit Assignment" icon={Edit3} onPress={() => navigation.navigate('AssignmentForm', { assignmentId })} />
+            <PrimaryButton title="Add Payment" icon={WalletCards} onPress={() => navigation.navigate('AddPayment', { projectId })} />
+            <SecondaryButton title="Edit Project" icon={Edit3} onPress={() => navigation.navigate('ProjectForm', { projectId })} />
             <SecondaryButton title="Attach Files" icon={FilePlus2} onPress={attachFiles} />
             <SecondaryButton title="Mark Completed" icon={CheckCircle2} onPress={complete} />
             <SecondaryButton title="Export PDF" icon={FileDown} onPress={exportPdf} />
-            <SecondaryButton title="Delete Assignment" icon={Trash2} onPress={() => setDeleteOpen(true)} />
+            <SecondaryButton title="Delete Project" icon={Trash2} onPress={() => setDeleteOpen(true)} />
           </View>
 
           <Text style={styles.sectionTitle}>Attached Files</Text>
@@ -160,7 +160,7 @@ export function AssignmentDetailScreen({ navigation, route }: Props) {
       </View>
       <ConfirmModal
         visible={deleteOpen}
-        title="Delete assignment?"
+        title="Delete project?"
         message="This also deletes related payment and file records from the local database."
         confirmLabel="Delete"
         destructive

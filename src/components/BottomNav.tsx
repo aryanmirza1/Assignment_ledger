@@ -7,7 +7,7 @@ import { colors, shadows } from '../theme/theme';
 
 const icons = {
   Dashboard: Home,
-  Assignments: BookOpenCheck,
+  Projects: BookOpenCheck,
   Payments: WalletCards,
   Files: Files,
   Settings: Settings,

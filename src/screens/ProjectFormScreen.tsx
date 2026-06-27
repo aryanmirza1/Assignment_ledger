@@ -7,13 +7,13 @@ import { AppHeader } from '../components/AppHeader';
 import { PrimaryButton, SecondaryButton } from '../components/Buttons';
 import { FilterChip } from '../components/FilterChip';
 import { TextInputField } from '../components/TextInputField';
-import { createAssignment, getAssignment, updateAssignment } from '../data/database';
+import { createProject, getProject, updateProject } from '../data/database';
 import {
-  assignmentStatuses,
-  assignmentTypes,
-  AssignmentInput,
-  AssignmentStatus,
-  AssignmentType,
+  projectStatuses,
+  projectTypes,
+  ProjectInput,
+  ProjectStatus,
+  ProjectType,
   priorities,
   Priority,
 } from '../data/types';
@@ -23,16 +23,16 @@ import { colors, radii, shadows, spacing } from '../theme/theme';
 import { displayDate, safeNumber, todayISO } from '../utils/format';
 import { CalendarModal } from '../components/CalendarModal';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'AssignmentForm'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'ProjectForm'>;
 
-const baseForm: AssignmentInput = {
+const baseForm: ProjectInput = {
   studentName: '',
   studentPhone: '',
   studentEmail: '',
   title: '',
   subject: '',
   institution: '',
-  assignmentType: 'Report',
+  projectType: 'Report',
   deadline: '',
   startDate: todayISO(),
   status: 'Not Started',
@@ -42,9 +42,9 @@ const baseForm: AssignmentInput = {
   notes: '',
 };
 
-export function AssignmentFormScreen({ navigation, route }: Props) {
-  const assignmentId = route.params?.assignmentId;
-  const [form, setForm] = useState<AssignmentInput>(baseForm);
+export function ProjectFormScreen({ navigation, route }: Props) {
+  const projectId = route.params?.projectId;
+  const [form, setForm] = useState<ProjectInput>(baseForm);
   const [totalText, setTotalText] = useState('');
   const [paidText, setPaidText] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -53,34 +53,34 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     const load = async () => {
-      if (!assignmentId) return;
-      const assignment = await getAssignment(assignmentId);
-      if (!assignment) return;
+      if (!projectId) return;
+      const project = await getProject(projectId);
+      if (!project) return;
       setForm({
-        studentName: assignment.studentName,
-        studentPhone: assignment.studentPhone,
-        studentEmail: assignment.studentEmail,
-        title: assignment.title,
-        subject: assignment.subject,
-        institution: assignment.institution,
-        assignmentType: assignment.assignmentType,
-        deadline: assignment.deadline,
-        startDate: assignment.startDate,
-        status: assignment.status,
-        priority: assignment.priority,
-        totalAmount: assignment.totalAmount,
-        paidAmount: assignment.paidAmount,
-        notes: assignment.notes,
+        studentName: project.studentName,
+        studentPhone: project.studentPhone,
+        studentEmail: project.studentEmail,
+        title: project.title,
+        subject: project.subject,
+        institution: project.institution,
+        projectType: project.projectType,
+        deadline: project.deadline,
+        startDate: project.startDate,
+        status: project.status,
+        priority: project.priority,
+        totalAmount: project.totalAmount,
+        paidAmount: project.paidAmount,
+        notes: project.notes,
       });
-      setTotalText(String(assignment.totalAmount));
-      setPaidText(String(assignment.paidAmount));
+      setTotalText(String(project.totalAmount));
+      setPaidText(String(project.paidAmount));
     };
     void load();
-  }, [assignmentId]);
+  }, [projectId]);
 
   const remaining = useMemo(() => Math.max(0, safeNumber(totalText) - safeNumber(paidText)), [paidText, totalText]);
 
-  const setField = <K extends keyof AssignmentInput>(key: K, value: AssignmentInput[K]) => {
+  const setField = <K extends keyof ProjectInput>(key: K, value: ProjectInput[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: '' }));
   };
@@ -88,7 +88,7 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
   const validate = () => {
     const next: Record<string, string> = {};
     if (!form.studentName.trim()) next.studentName = 'Student/client name is required.';
-    if (!form.title.trim()) next.title = 'Assignment title is required.';
+    if (!form.title.trim()) next.title = 'Project title is required.';
     if (!form.deadline.trim()) next.deadline = 'Deadline is required.';
     if (safeNumber(totalText) < 0) next.totalAmount = 'Total amount cannot be negative.';
     if (safeNumber(paidText) < 0) next.paidAmount = 'Paid amount cannot be negative.';
@@ -99,29 +99,29 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
 
   const save = async () => {
     if (!validate()) return;
-    const payload: AssignmentInput = {
+    const payload: ProjectInput = {
       ...form,
       totalAmount: safeNumber(totalText),
       paidAmount: Math.min(safeNumber(paidText), safeNumber(totalText)),
     };
 
-    if (assignmentId) {
-      await updateAssignment(assignmentId, payload);
+    if (projectId) {
+      await updateProject(projectId, payload);
       navigation.goBack();
       return;
     }
 
-    const id = await createAssignment(payload);
-    Alert.alert('Assignment saved', 'You can attach reference files from the detail screen.');
-    navigation.replace('AssignmentDetail', { assignmentId: id });
+    const id = await createProject(payload);
+    Alert.alert('Project saved', 'You can attach reference files from the detail screen.');
+    navigation.replace('ProjectDetail', { projectId: id });
   };
 
   const attachFiles = async () => {
-    if (!assignmentId) {
-      Alert.alert('Save first', 'Open the saved assignment detail screen to attach files.');
+    if (!projectId) {
+      Alert.alert('Save first', 'Open the saved project detail screen to attach files.');
       return;
     }
-    const count = await pickAndAttachFiles(assignmentId);
+    const count = await pickAndAttachFiles(projectId);
     if (count > 0) {
       Alert.alert('Files attached', `${count} file${count === 1 ? '' : 's'} saved locally.`);
     }
@@ -130,7 +130,7 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <AppHeader
-        title={assignmentId ? 'Edit Assignment' : 'Add Assignment'}
+        title={projectId ? 'Edit Project' : 'Add Project'}
         subtitle="Client, deadline, payment, and notes"
         onBack={() => navigation.goBack()}
         rightIcon={Save}
@@ -159,9 +159,9 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
             />
           </Section>
 
-          <Section title="Assignment Details">
+          <Section title="Project Details">
             <TextInputField
-              label="Assignment title"
+              label="Project title"
               value={form.title}
               onChangeText={(value) => setField('title', value)}
               error={errors.title}
@@ -197,23 +197,23 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
               {errors.deadline ? <Text style={styles.errorText}>{errors.deadline}</Text> : null}
             </View>
 
-            <ChipGroup title="Assignment Type">
-              {assignmentTypes.map((type) => (
+            <ChipGroup title="Project Type">
+              {projectTypes.map((type) => (
                 <FilterChip
                   key={type}
                   label={type}
-                  active={form.assignmentType === type}
-                  onPress={() => setField('assignmentType', type as AssignmentType)}
+                  active={form.projectType === type}
+                  onPress={() => setField('projectType', type as ProjectType)}
                 />
               ))}
             </ChipGroup>
             <ChipGroup title="Status">
-              {assignmentStatuses.map((status) => (
+              {projectStatuses.map((status) => (
                 <FilterChip
                   key={status}
                   label={status}
                   active={form.status === status}
-                  onPress={() => setField('status', status as AssignmentStatus)}
+                  onPress={() => setField('status', status as ProjectStatus)}
                 />
               ))}
             </ChipGroup>
@@ -249,14 +249,14 @@ export function AssignmentFormScreen({ navigation, route }: Props) {
               style={styles.textArea}
             />
             <SecondaryButton
-              title={assignmentId ? 'Attach Reference Files' : 'Attach after saving'}
+              title={projectId ? 'Attach Reference Files' : 'Attach after saving'}
               icon={FilePlus2}
               onPress={attachFiles}
             />
           </Section>
 
           <View style={styles.actions}>
-            <PrimaryButton title="Save Assignment" icon={Save} onPress={save} />
+            <PrimaryButton title="Save Project" icon={Save} onPress={save} />
             <SecondaryButton title="Cancel" onPress={() => navigation.goBack()} />
           </View>
         </ScrollView>

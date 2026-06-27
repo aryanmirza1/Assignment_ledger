@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
   AlertTriangle,
@@ -17,9 +16,8 @@ import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton, SecondaryButton } from '../components/Buttons';
 import { StatusBadge } from '../components/StatusBadge';
 import { SummaryCard } from '../components/SummaryCard';
-import { Assignment, Analytics } from '../data/types';
-import { getAnalytics, listAssignments, listPayments } from '../data/database';
-import { RootStackParamList } from '../navigation/types';
+import { Project, Analytics } from '../data/types';
+import { getAnalytics, listProjects, listPayments } from '../data/database';
 import { exportFullRecordsPdf } from '../services/pdfService';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 import { currency, displayDate, isDueSoon, isOverdue } from '../utils/format';
@@ -29,12 +27,12 @@ type Navigation = any;
 export function DashboardScreen() {
   const navigation = useNavigation<Navigation>();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   const load = useCallback(async () => {
-    const [analyticsResult, assignmentResult] = await Promise.all([getAnalytics(), listAssignments()]);
+    const [analyticsResult, projectResult] = await Promise.all([getAnalytics(), listProjects()]);
     setAnalytics(analyticsResult);
-    setAssignments(assignmentResult);
+    setProjects(projectResult);
   }, []);
 
   useFocusEffect(
@@ -43,54 +41,54 @@ export function DashboardScreen() {
     }, [load]),
   );
 
-  const dueSoon = assignments.filter((item) => isDueSoon(item) || isOverdue(item)).slice(0, 4);
+  const dueSoon = projects.filter((item) => isDueSoon(item) || isOverdue(item)).slice(0, 4);
 
   const exportReport = async () => {
-    const [freshAnalytics, freshAssignments, payments] = await Promise.all([
+    const [freshAnalytics, freshProjects, payments] = await Promise.all([
       getAnalytics(),
-      listAssignments(),
+      listProjects(),
       listPayments(),
     ]);
-    await exportFullRecordsPdf(freshAnalytics, freshAssignments, payments);
+    await exportFullRecordsPdf(freshAnalytics, freshProjects, payments);
   };
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
-      <AppHeader title="Assignment Ledger" subtitle="Hello, Aryan!" rightIcon={CalendarClock} />
+      <AppHeader title="Project Tracker" subtitle="Hello, Aryan!" rightIcon={CalendarClock} />
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
             <Text style={styles.greeting}>Track your work, payments, and deadlines</Text>
-            <Text style={styles.heroSub}>Local-only records for assignments and client payments.</Text>
+            <Text style={styles.heroSub}>Local-only records for projects and client payments.</Text>
           </View>
 
           <View style={styles.grid}>
             <SummaryCard
-              label="Total Assignments"
-              value={analytics?.totalAssignments ?? 0}
+              label="Total Projects"
+              value={analytics?.totalProjects ?? 0}
               icon={ReceiptText}
-              onPress={() => navigation.navigate('Assignments', { filter: 'All' })}
+              onPress={() => navigation.navigate('Projects', { filter: 'All' })}
             />
             <SummaryCard
-              label="Active Assignments"
-              value={analytics?.activeAssignments ?? 0}
+              label="Active Projects"
+              value={analytics?.activeProjects ?? 0}
               icon={ListPlus}
               tone="dark"
-              onPress={() => navigation.navigate('Assignments', { filter: 'Active' })}
+              onPress={() => navigation.navigate('Projects', { filter: 'Active' })}
             />
             <SummaryCard
               label="Completed"
-              value={analytics?.completedAssignments ?? 0}
+              value={analytics?.completedProjects ?? 0}
               icon={CheckCircle2}
               tone="green"
-              onPress={() => navigation.navigate('Assignments', { filter: 'Completed' })}
+              onPress={() => navigation.navigate('Projects', { filter: 'Completed' })}
             />
             <SummaryCard
               label="Pending Payment"
               value={currency(analytics?.totalRemaining ?? 0)}
               icon={WalletCards}
               tone="orange"
-              onPress={() => navigation.navigate('Assignments', { filter: 'Pending Payment' })}
+              onPress={() => navigation.navigate('Projects', { filter: 'Pending Payment' })}
             />
             <SummaryCard
               label="Total Received"
@@ -101,10 +99,10 @@ export function DashboardScreen() {
             />
             <SummaryCard
               label="Overdue Tasks"
-              value={analytics?.overdueAssignments ?? 0}
+              value={analytics?.overdueProjects ?? 0}
               icon={AlertTriangle}
               tone="red"
-              onPress={() => navigation.navigate('Assignments', { filter: 'Overdue' })}
+              onPress={() => navigation.navigate('Projects', { filter: 'Overdue' })}
             />
           </View>
 
@@ -114,46 +112,46 @@ export function DashboardScreen() {
 
           {dueSoon.length ? (
             <View style={styles.list}>
-              {dueSoon.map((assignment) => (
+              {dueSoon.map((project) => (
                 <TouchableOpacity
-                  key={assignment.id}
+                  key={project.id}
                   style={styles.dueCard}
-                  onPress={() => navigation.navigate('AssignmentDetail', { assignmentId: assignment.id })}
+                  onPress={() => navigation.navigate('ProjectDetail', { projectId: project.id })}
                 >
                   <View style={styles.dueTop}>
                     <View style={styles.flex}>
-                      <Text style={styles.dueTitle}>{assignment.title}</Text>
-                      <Text style={styles.dueMeta}>{assignment.studentName}</Text>
+                      <Text style={styles.dueTitle}>{project.title}</Text>
+                      <Text style={styles.dueMeta}>{project.studentName}</Text>
                     </View>
-                    <StatusBadge label={isOverdue(assignment) ? 'Overdue' : assignment.status} />
+                    <StatusBadge label={isOverdue(project) ? 'Overdue' : project.status} />
                   </View>
-                  <Text style={styles.dueMeta}>Deadline {displayDate(assignment.deadline)}</Text>
-                  {assignment.remainingAmount > 0 ? (
-                    <Text style={styles.remaining}>Remaining {currency(assignment.remainingAmount)}</Text>
+                  <Text style={styles.dueMeta}>Deadline {displayDate(project.deadline)}</Text>
+                  {project.remainingAmount > 0 ? (
+                    <Text style={styles.remaining}>Remaining {currency(project.remainingAmount)}</Text>
                   ) : null}
                 </TouchableOpacity>
               ))}
             </View>
-          ) : assignments.length > 0 ? (
+          ) : projects.length > 0 ? (
             <EmptyState
               icon={CheckCircle2}
               title="All caught up!"
-              description="No urgent assignments due soon or overdue."
+              description="No urgent projects due soon or overdue."
             />
           ) : (
             <EmptyState
               icon={CalendarClock}
-              title="No assignments yet"
-              description="Create your first assignment to start tracking work and payments."
-              actionLabel="Add Assignment"
-              onAction={() => navigation.navigate('AssignmentForm')}
+              title="No projects yet"
+              description="Create your first project to start tracking work and payments."
+              actionLabel="Add Project"
+              onAction={() => navigation.navigate('ProjectForm')}
             />
           )}
 
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actions}>
-            <PrimaryButton title="Add Assignment" icon={ListPlus} onPress={() => navigation.navigate('AssignmentForm')} />
-            <SecondaryButton title="Add Payment" icon={WalletCards} onPress={() => navigation.navigate('AddPayment')} />
+            <PrimaryButton title="Add Project" icon={ListPlus} onPress={() => navigation.navigate('ProjectForm')} />
+            <PrimaryButton title="Add Payment" icon={WalletCards} onPress={() => navigation.navigate('AddPayment')} style={{ backgroundColor: colors.primary }} />
             <SecondaryButton title="Export Report" icon={FileDown} onPress={exportReport} />
           </View>
         </ScrollView>
@@ -179,27 +177,29 @@ const styles = StyleSheet.create({
     backgroundColor: colors.navy,
     borderRadius: radii.xl,
     padding: spacing.lg,
+    marginBottom: spacing.md,
     ...shadows.card,
   },
   greeting: {
     color: colors.white,
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '900',
   },
   heroSub: {
     color: '#cbd5e1',
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: spacing.xs,
+    fontSize: 14,
+    marginTop: 6,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.md,
-    marginTop: spacing.md,
-    justifyContent: 'space-between',
   },
   sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
     marginTop: spacing.lg,
   },
   sectionTitle: {
@@ -222,27 +222,29 @@ const styles = StyleSheet.create({
   },
   dueTop: {
     flexDirection: 'row',
-    gap: spacing.md,
-  },
-  flex: {
-    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
   },
   dueTitle: {
     color: colors.text,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '900',
   },
   dueMeta: {
     color: colors.muted,
     fontSize: 13,
-    fontWeight: '700',
-    marginTop: 4,
+    marginTop: 2,
   },
   remaining: {
     color: colors.warning,
     fontSize: 13,
     fontWeight: '900',
-    marginTop: spacing.sm,
+    marginTop: 6,
+  },
+  flex: {
+    flex: 1,
+    paddingRight: spacing.sm,
   },
   actions: {
     gap: spacing.sm,

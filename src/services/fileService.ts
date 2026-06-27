@@ -6,15 +6,15 @@ import { Alert, Platform } from 'react-native';
 import { addFileRecord, importSnapshot } from '../data/database';
 import { sanitizeFileName } from '../utils/format';
 
-const attachmentDirectory = `${FileSystem.documentDirectory}assignment-ledger-files/`;
-const backupDirectory = `${FileSystem.documentDirectory}assignment-ledger-backups/`;
+const attachmentDirectory = `${FileSystem.documentDirectory}project-tracker-files/`;
+const backupDirectory = `${FileSystem.documentDirectory}project-tracker-backups/`;
 
 export const ensureStorage = async () => {
   await FileSystem.makeDirectoryAsync(attachmentDirectory, { intermediates: true }).catch(() => {});
   await FileSystem.makeDirectoryAsync(backupDirectory, { intermediates: true }).catch(() => {});
 };
 
-export const pickAndAttachFiles = async (assignmentId: number) => {
+export const pickAndAttachFiles = async (projectId: number) => {
   await ensureStorage();
   const result = await DocumentPicker.getDocumentAsync({
     type: ['application/pdf', 'image/*', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '*/*'],
@@ -32,7 +32,7 @@ export const pickAndAttachFiles = async (assignmentId: number) => {
     const destination = `${attachmentDirectory}${safeName}`;
     await FileSystem.copyAsync({ from: asset.uri, to: destination });
     await addFileRecord(
-      assignmentId,
+      projectId,
       asset.name,
       destination,
       asset.mimeType ?? getTypeFromName(asset.name),
@@ -72,7 +72,6 @@ export const openFileLocally = async (localUri: string, mimeType: string) => {
     }
   } catch (error) {
     console.error('Error opening file:', error);
-    // Fallback to regular share sheet if launcher fails or app is missing
     try {
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
@@ -98,26 +97,22 @@ export const saveFileToDevice = async (localUri: string, fileName: string, mimeT
     if (Platform.OS === 'android') {
       const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
       if (permissions.granted) {
-        // Read local file as base64
         const fileContent = await FileSystem.readAsStringAsync(localUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
         
-        // Create file in the chosen directory
         const safUri = await FileSystem.StorageAccessFramework.createFileAsync(
           permissions.directoryUri,
           fileName,
           mimeType
         );
         
-        // Write base64 content
         await FileSystem.writeAsStringAsync(safUri, fileContent, {
           encoding: FileSystem.EncodingType.Base64,
         });
         
         Alert.alert('Download Successful', `Saved "${fileName}" to your selected folder.`);
         
-        // Open file immediately
         void openFileLocally(localUri, mimeType);
         
         return safUri;
@@ -127,7 +122,6 @@ export const saveFileToDevice = async (localUri: string, fileName: string, mimeT
     console.error('Error saving file directly:', error);
   }
 
-  // Fallback to Sharing sheet (iOS or if Android permissions denied / failed)
   const canShare = await Sharing.isAvailableAsync();
   if (!canShare) {
     Alert.alert('Download failed', 'This device cannot save or share files.');
@@ -139,7 +133,7 @@ export const saveFileToDevice = async (localUri: string, fileName: string, mimeT
 
 export const writeBackupFile = async (snapshot: unknown) => {
   await ensureStorage();
-  const name = `assignment-ledger-backup-${Date.now()}.json`;
+  const name = `project-tracker-backup-${Date.now()}.json`;
   const fileUri = `${backupDirectory}${name}`;
   await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(snapshot, null, 2));
   await saveFileToDevice(fileUri, name, 'application/json');

@@ -18,7 +18,7 @@ export function PaymentCard({ payment, onDelete }: Props) {
       </View>
       <View style={styles.flex}>
         <Text style={styles.title}>{payment.studentName}</Text>
-        <Text style={styles.subtitle}>{payment.assignmentTitle}</Text>
+        <Text style={styles.subtitle}>{payment.projectTitle}</Text>
         <Text style={styles.note}>
           {payment.paymentMethod} · {displayDate(payment.paymentDate)}
           {payment.note ? ` · ${payment.note}` : ''}

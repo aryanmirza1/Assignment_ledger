@@ -1,4 +1,4 @@
-export type AssignmentStatus = 'Not Started' | 'In Progress' | 'Submitted' | 'Completed' | 'Cancelled';
+export type ProjectStatus = 'Not Started' | 'In Progress' | 'Submitted' | 'Completed' | 'Cancelled';
 
 export type Priority = 'Low' | 'Medium' | 'High' | 'Urgent';
 
@@ -6,7 +6,7 @@ export type PaymentStatus = 'Not Paid' | 'Partially Paid' | 'Fully Paid';
 
 export type PaymentMethod = 'Cash' | 'Bank Transfer' | 'Easypaisa' | 'JazzCash' | 'Other';
 
-export type AssignmentType =
+export type ProjectType =
   | 'Essay'
   | 'Report'
   | 'Presentation'
@@ -16,7 +16,7 @@ export type AssignmentType =
   | 'Technical Task'
   | 'Other';
 
-export type Assignment = {
+export type Project = {
   id: number;
   studentName: string;
   studentPhone: string;
@@ -24,10 +24,10 @@ export type Assignment = {
   title: string;
   subject: string;
   institution: string;
-  assignmentType: AssignmentType;
+  projectType: ProjectType;
   deadline: string;
   startDate: string;
-  status: AssignmentStatus;
+  status: ProjectStatus;
   priority: Priority;
   totalAmount: number;
   paidAmount: number;
@@ -38,15 +38,15 @@ export type Assignment = {
   updatedAt: string;
 };
 
-export type AssignmentInput = Omit<
-  Assignment,
+export type ProjectInput = Omit<
+  Project,
   'id' | 'remainingAmount' | 'paymentStatus' | 'createdAt' | 'updatedAt'
 >;
 
 export type Payment = {
   id: number;
-  assignmentId: number;
-  assignmentTitle?: string;
+  projectId: number;
+  projectTitle?: string;
   studentName?: string;
   amount: number;
   paymentMethod: PaymentMethod;
@@ -57,8 +57,8 @@ export type Payment = {
 
 export type LedgerFile = {
   id: number;
-  assignmentId: number;
-  assignmentTitle?: string;
+  projectId: number;
+  projectTitle?: string;
   studentName?: string;
   fileName: string;
   fileUri: string;
@@ -68,10 +68,10 @@ export type LedgerFile = {
 };
 
 export type Analytics = {
-  totalAssignments: number;
-  activeAssignments: number;
-  completedAssignments: number;
-  overdueAssignments: number;
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  overdueProjects: number;
   totalAmount: number;
   totalReceived: number;
   totalRemaining: number;
@@ -79,7 +79,7 @@ export type Analytics = {
   pendingPayments: number;
 };
 
-export const assignmentStatuses: AssignmentStatus[] = [
+export const projectStatuses: ProjectStatus[] = [
   'Not Started',
   'In Progress',
   'Submitted',
@@ -89,7 +89,7 @@ export const assignmentStatuses: AssignmentStatus[] = [
 
 export const priorities: Priority[] = ['Low', 'Medium', 'High', 'Urgent'];
 
-export const assignmentTypes: AssignmentType[] = [
+export const projectTypes: ProjectType[] = [
   'Report',
   'Case Study',
   'Research',
