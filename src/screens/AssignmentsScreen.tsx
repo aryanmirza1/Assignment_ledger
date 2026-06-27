@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { Plus, Search, SlidersHorizontal } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '../components/AppHeader';
@@ -21,9 +21,18 @@ const filters: Filter[] = ['All', 'Active', 'Completed', 'Pending Payment', 'Ove
 
 export function AssignmentsScreen() {
   const navigation = useNavigation<Navigation>();
+  const route = useRoute();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('All');
+
+  React.useEffect(() => {
+    const params = route.params as { filter?: Filter } | undefined;
+    if (params?.filter) {
+      setFilter(params.filter);
+      navigation.setParams({ filter: undefined } as any);
+    }
+  }, [route.params, navigation]);
 
   const load = useCallback(async () => {
     setAssignments(await listAssignments());

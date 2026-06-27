@@ -5,7 +5,6 @@ import {
   DatabaseBackup,
   FileDown,
   Info,
-  RefreshCcw,
   RotateCcw,
   ShieldCheck,
   Trash2,
@@ -14,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '../components/AppHeader';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { clearAllData, exportSnapshot, getAnalytics, listAssignments, listPayments, reseedData } from '../data/database';
+import { clearAllData, exportSnapshot, getAnalytics, listAssignments, listPayments } from '../data/database';
 import { exportFullRecordsPdf } from '../services/pdfService';
 import { importBackupFile, writeBackupFile } from '../services/fileService';
 import { colors, radii, shadows, spacing } from '../theme/theme';
@@ -52,10 +51,7 @@ export function SettingsScreen() {
     navigation.navigate('Dashboard' as never);
   };
 
-  const reseed = async () => {
-    await reseedData();
-    Alert.alert('Sample data restored', 'The three demo assignment records are back.');
-  };
+
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
@@ -79,7 +75,6 @@ export function SettingsScreen() {
             <SettingRow icon={FileDown} title="Export All Records as PDF" onPress={exportPdf} />
             <SettingRow icon={DatabaseBackup} title="Export Database Backup" onPress={exportBackup} />
             <SettingRow icon={Upload} title="Import Database Backup" onPress={importBackup} />
-            <SettingRow icon={RefreshCcw} title="Restore Sample Seed Data" onPress={reseed} />
             <SettingRow icon={Trash2} title="Clear All Data" danger onPress={() => setClearOpen(true)} />
             <SettingRow
               icon={Info}

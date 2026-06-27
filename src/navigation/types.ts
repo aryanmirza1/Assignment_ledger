@@ -2,7 +2,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type TabParamList = {
   Dashboard: undefined;
-  Assignments: undefined;
+  Assignments: { filter?: 'All' | 'Active' | 'Completed' | 'Pending Payment' | 'Overdue' } | undefined;
   Payments: undefined;
   Files: undefined;
   Settings: undefined;

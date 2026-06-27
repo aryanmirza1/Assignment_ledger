@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LucideIcon } from 'lucide-react-native';
 import { colors, radii, shadows, spacing } from '../theme/theme';
 
@@ -8,6 +8,7 @@ type Props = {
   value: string | number;
   icon: LucideIcon;
   tone?: 'blue' | 'green' | 'orange' | 'red' | 'dark';
+  onPress?: () => void;
 };
 
 const toneColors = {
@@ -21,16 +22,18 @@ const toneColors = {
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - spacing.md * 2 - spacing.md) / 2;
 
-export function SummaryCard({ label, value, icon: Icon, tone = 'blue' }: Props) {
+export function SummaryCard({ label, value, icon: Icon, tone = 'blue', onPress }: Props) {
   const toneColor = toneColors[tone];
+  const Container = onPress ? TouchableOpacity : View;
+
   return (
-    <View style={styles.card}>
+    <Container style={styles.card} onPress={onPress} activeOpacity={onPress ? 0.7 : undefined}>
       <View style={[styles.iconWrap, { backgroundColor: `${toneColor}16` }]}>
         <Icon color={toneColor} size={20} />
       </View>
       <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
       <Text style={styles.label} numberOfLines={2}>{label}</Text>
-    </View>
+    </Container>
   );
 }
 

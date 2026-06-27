@@ -65,12 +65,47 @@ export function DashboardScreen() {
           </View>
 
           <View style={styles.grid}>
-            <SummaryCard label="Total Assignments" value={analytics?.totalAssignments ?? 0} icon={ReceiptText} />
-            <SummaryCard label="Active Assignments" value={analytics?.activeAssignments ?? 0} icon={ListPlus} tone="dark" />
-            <SummaryCard label="Completed" value={analytics?.completedAssignments ?? 0} icon={CheckCircle2} tone="green" />
-            <SummaryCard label="Pending Payment" value={currency(analytics?.totalRemaining ?? 0)} icon={WalletCards} tone="orange" />
-            <SummaryCard label="Total Received" value={currency(analytics?.totalReceived ?? 0)} icon={WalletCards} tone="green" />
-            <SummaryCard label="Overdue Tasks" value={analytics?.overdueAssignments ?? 0} icon={AlertTriangle} tone="red" />
+            <SummaryCard
+              label="Total Assignments"
+              value={analytics?.totalAssignments ?? 0}
+              icon={ReceiptText}
+              onPress={() => navigation.navigate('Assignments', { filter: 'All' })}
+            />
+            <SummaryCard
+              label="Active Assignments"
+              value={analytics?.activeAssignments ?? 0}
+              icon={ListPlus}
+              tone="dark"
+              onPress={() => navigation.navigate('Assignments', { filter: 'Active' })}
+            />
+            <SummaryCard
+              label="Completed"
+              value={analytics?.completedAssignments ?? 0}
+              icon={CheckCircle2}
+              tone="green"
+              onPress={() => navigation.navigate('Assignments', { filter: 'Completed' })}
+            />
+            <SummaryCard
+              label="Pending Payment"
+              value={currency(analytics?.totalRemaining ?? 0)}
+              icon={WalletCards}
+              tone="orange"
+              onPress={() => navigation.navigate('Assignments', { filter: 'Pending Payment' })}
+            />
+            <SummaryCard
+              label="Total Received"
+              value={currency(analytics?.totalReceived ?? 0)}
+              icon={WalletCards}
+              tone="green"
+              onPress={() => navigation.navigate('Payments')}
+            />
+            <SummaryCard
+              label="Overdue Tasks"
+              value={analytics?.overdueAssignments ?? 0}
+              icon={AlertTriangle}
+              tone="red"
+              onPress={() => navigation.navigate('Assignments', { filter: 'Overdue' })}
+            />
           </View>
 
           <View style={styles.sectionHeader}>

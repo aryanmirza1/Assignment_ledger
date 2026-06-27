@@ -99,7 +99,6 @@ export function AssignmentDetailScreen({ navigation, route }: Props) {
             <Text style={styles.subtitle}>{assignment.subject}</Text>
             <View style={styles.badges}>
               <StatusBadge label={assignment.status} />
-              <StatusBadge label={assignment.priority} type="priority" />
               <StatusBadge label={assignment.paymentStatus} type="payment" />
             </View>
           </View>
