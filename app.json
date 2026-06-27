@@ -24,6 +24,12 @@
     },
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c673f3a2-8d56-4af6-a381-5a300cf529e8"
+      }
+    },
+    "owner": "aryanmirza1"
   }
 }
