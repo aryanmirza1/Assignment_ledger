@@ -1,6 +1,6 @@
-# Assignment Ledger
+# Project Tracker
 
-A personal, offline-first React Native app for tracking assignments, clients, payments, files, and PDF reports.
+A personal, offline-first React Native app for tracking projects, assignments, clients, payments, files, and PDF reports.
 
 ## Tech Stack
 
