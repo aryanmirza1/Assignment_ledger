@@ -3,7 +3,7 @@ import * as Print from 'expo-print';
 import { Alert } from 'react-native';
 import { Assignment, LedgerFile, Payment, Analytics } from '../data/types';
 import { currency, displayDate, nowISO } from '../utils/format';
-import { shareFile } from './fileService';
+import { saveFileToDevice } from './fileService';
 
 const pdfDirectory = `${FileSystem.documentDirectory}assignment-ledger-pdfs/`;
 
@@ -80,10 +80,9 @@ export const exportAssignmentPdf = async (
   `;
   const file = await Print.printToFileAsync({ html });
   const safeName = assignment.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-  const localUri = await savePdfLocally(file.uri, `${safeName}-${Date.now()}.pdf`);
-  Alert.alert('PDF Saved', 'Report saved locally. Opening share sheet...', [
-    { text: 'OK', onPress: () => shareFile(localUri) },
-  ]);
+  const name = `${safeName}-${Date.now()}.pdf`;
+  const localUri = await savePdfLocally(file.uri, name);
+  await saveFileToDevice(localUri, name, 'application/pdf');
   return localUri;
 };
 
@@ -133,10 +132,9 @@ export const exportFullRecordsPdf = async (
     </body></html>
   `;
   const file = await Print.printToFileAsync({ html });
-  const localUri = await savePdfLocally(file.uri, `full-report-${Date.now()}.pdf`);
-  Alert.alert('PDF Saved', 'Report saved locally. Opening share sheet...', [
-    { text: 'OK', onPress: () => shareFile(localUri) },
-  ]);
+  const name = `full-report-${Date.now()}.pdf`;
+  const localUri = await savePdfLocally(file.uri, name);
+  await saveFileToDevice(localUri, name, 'application/pdf');
   return localUri;
 };
 

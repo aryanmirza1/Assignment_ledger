@@ -1,7 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { addFileRecord, importSnapshot } from '../data/database';
 import { sanitizeFileName } from '../utils/format';
 
@@ -52,11 +52,52 @@ export const shareFile = async (uri: string) => {
   await Sharing.shareAsync(uri);
 };
 
+export const saveFileToDevice = async (localUri: string, fileName: string, mimeType: string) => {
+  try {
+    if (Platform.OS === 'android') {
+      const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (permissions.granted) {
+        // Read local file as base64
+        const fileContent = await FileSystem.readAsStringAsync(localUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        // Create file in the chosen directory
+        const safUri = await FileSystem.StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          fileName,
+          mimeType
+        );
+        
+        // Write base64 content
+        await FileSystem.writeAsStringAsync(safUri, fileContent, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        Alert.alert('Download Successful', `Saved "${fileName}" to your selected folder.`);
+        return safUri;
+      }
+    }
+  } catch (error) {
+    console.error('Error saving file directly:', error);
+  }
+
+  // Fallback to Sharing sheet (iOS or if Android permissions denied / failed)
+  const canShare = await Sharing.isAvailableAsync();
+  if (!canShare) {
+    Alert.alert('Download failed', 'This device cannot save or share files.');
+    return null;
+  }
+  await Sharing.shareAsync(localUri);
+  return localUri;
+};
+
 export const writeBackupFile = async (snapshot: unknown) => {
   await ensureStorage();
-  const fileUri = `${backupDirectory}assignment-ledger-backup-${Date.now()}.json`;
+  const name = `assignment-ledger-backup-${Date.now()}.json`;
+  const fileUri = `${backupDirectory}${name}`;
   await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(snapshot, null, 2));
-  await shareFile(fileUri);
+  await saveFileToDevice(fileUri, name, 'application/json');
   return fileUri;
 };
 
